@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 210 20% 98%;
+    --card-foreground: 222 47% 11%;
+    --primary: 262 83% 58%; /* #7C3AED */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 60%; /* #EC4899 */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 48 96% 53%; /* #FACC15 */
+    --accent-foreground: 222 47% 11%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 215 16% 47%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262 83% 58%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 229 84% 5%; /* #020617 */
+    --foreground: 0 0% 100%;
+    --card: 222 47% 11%;
+    --card-foreground: 0 0% 100%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 48 96% 53%;
+    --accent-foreground: 222 47% 11%;
+    --muted: 222 37% 15%;
+    --muted-foreground: 215 20% 72%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 35% 18%;
+    --input: 222 35% 18%;
+    --ring: 262 83% 58%;
+  }
+
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground antialiased; }
+}
+
+@layer components {
+  .brand-gradient { @apply bg-gradient-to-r from-primary via-secondary to-accent; }
+  .text-gradient { @apply bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent; }
+  .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 5rem); }
+  .video-scroll { scroll-snap-type: y mandatory; }
+  .video-snap { scroll-snap-align: start; }
+}
