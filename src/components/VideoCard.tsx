@@ -97,6 +97,13 @@ export function VideoCard({ video, active = true, compact = false, onDeleted }: 
     }
   }, [active, directVideo]);
 
+  // Sincroniza imediatamente a propriedade `muted` do elemento de vídeo
+  // com o estado React para evitar discrepâncias entre DOM e estado.
+  React.useEffect(() => {
+    const el = ref.current;
+    if (el) el.muted = muted;
+  }, [muted]);
+
   async function toggleLike() {
     if (!user) return navigate('/login');
 
@@ -181,6 +188,7 @@ export function VideoCard({ video, active = true, compact = false, onDeleted }: 
           src={video.video_url}
           poster={poster}
           muted={muted}
+          onToggleMuted={(next) => setMuted(next)}
           active={active}
           loop
           onClick={handleMediaClick}
@@ -203,7 +211,28 @@ export function VideoCard({ video, active = true, compact = false, onDeleted }: 
           <span className="-mt-3 text-xs font-bold">{likes}</span>
           <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full bg-black/30 text-white hover:bg-white/20" onClick={() => navigate(`/video/${video.id}`)}><MessageCircle className="h-7 w-7" /></Button>
           <span className="-mt-3 text-xs font-bold">{commentsCount}</span>
-          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full bg-black/30 text-white hover:bg-white/20" onClick={() => setMuted((v) => !v)}>{muted ? <VolumeX /> : <Volume2 />}</Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12 rounded-full bg-black/30 text-white hover:bg-white/20"
+            onClick={async () => {
+              const newMuted = !muted;
+              setMuted(newMuted);
+              // Se desmutando, tente tocar o vídeo — clique do usuário conta como gesto.
+              const el = ref.current;
+              if (!newMuted && el) {
+                try {
+                  await el.play();
+                  setShowPlay(false);
+                } catch {
+                  // ignore: se ainda falhar, mostramos o botão de play
+                  setShowPlay(true);
+                }
+              }
+            }}
+          >
+            {muted ? <VolumeX /> : <Volume2 />}
+          </Button>
           {compact && <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full bg-black/30 text-white hover:bg-white/20" onClick={() => setFullscreen(true)}><Maximize2 /></Button>}
           {!owner && <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full bg-black/30 text-white hover:bg-white/20" onClick={toggleFollow}>{following ? <UserCheck className="text-accent" /> : <UserPlus />}</Button>}
           {owner && <DropdownMenu trigger={<MoreHorizontal className="h-7 w-7" />} className="text-foreground"><DropdownMenuItem onClick={() => navigate(`/upload?edit=${video.id}`)}><Pencil className="h-4 w-4" /> Editar</DropdownMenuItem><DropdownMenuItem className="text-destructive" onClick={deleteVideo}><Trash2 className="h-4 w-4" /> Excluir</DropdownMenuItem></DropdownMenu>}

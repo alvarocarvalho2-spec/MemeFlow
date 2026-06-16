@@ -13,6 +13,7 @@ type MediaPlayerProps = {
   className?: string;
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   onClick?: () => void;
+  onToggleMuted?: (next: boolean) => void;
   /**
    * Social embeds (Instagram/TikTok) capturam wheel/touch e muitas vezes têm altura
    * interna maior que a viewport. No feed isso quebra o snap scroll. Por padrão,
@@ -41,9 +42,24 @@ function ProviderPreview({ src, poster, provider, onClick, className }: { src: s
   );
 }
 
-export function MediaPlayer({ src, poster, active = true, muted = true, loop = true, controls = false, className, videoRef, onClick, interactiveEmbeds = false }: MediaPlayerProps) {
+export function MediaPlayer({ src, poster, active = true, muted = true, loop = true, controls = false, className, videoRef, onClick, interactiveEmbeds = false, onToggleMuted }: MediaPlayerProps) {
   const provider = getVideoProvider(src);
-  const embedUrl = getEmbedUrl(src, active);
+  // Gerar URL de embed com autoplay quando `active`.
+  // Para garantir autoplay no feed sem interação, adicionamos params de
+  // mute ao embed quando estiver ativo e mutado.
+  let embedUrl = getEmbedUrl(src, active);
+  if (embedUrl && active && muted) {
+    try {
+      const u = new URL(embedUrl);
+      u.searchParams.set('autoplay', '1');
+      u.searchParams.set('mute', '1');
+      u.searchParams.set('muted', '1');
+      embedUrl = u.toString();
+    } catch {
+      // fallback: append query params
+      embedUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&muted=1`;
+    }
+  }
   const [failed, setFailed] = React.useState(false);
   const isSocialEmbed = provider === 'tiktok' || provider === 'instagram';
 
@@ -65,20 +81,44 @@ export function MediaPlayer({ src, poster, active = true, muted = true, loop = t
     }
 
     return (
-      <video
-        ref={videoRef}
-        className={cn('h-full w-full object-cover', className)}
-        src={src}
-        poster={poster || undefined}
-        muted={muted}
-        loop={loop}
-        controls={controls}
-        playsInline
-        preload="metadata"
-        crossOrigin="anonymous"
-        onClick={onClick}
-        onError={() => setFailed(true)}
-      />
+      <div className={cn('relative h-full w-full', className)}>
+        <video
+          ref={videoRef}
+          className="h-full w-full object-cover"
+          src={src}
+          poster={poster || undefined}
+          muted={muted}
+          loop={loop}
+          controls={controls}
+          playsInline
+          preload="metadata"
+          crossOrigin="anonymous"
+          onClick={onClick}
+          onError={() => setFailed(true)}
+          autoPlay={active}
+        />
+        {muted && active && (
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              const el = videoRef?.current;
+              onToggleMuted?.(false);
+              if (el) {
+                try {
+                  el.muted = false;
+                  await el.play();
+                } catch {
+                  // ignore
+                }
+              }
+            }}
+            className="absolute right-4 bottom-4 z-30 rounded-full bg-black/60 p-3 text-white backdrop-blur"
+            aria-label="Ativar som"
+          >
+            ▶︎ Som
+          </button>
+        )}
+      </div>
     );
   }
 

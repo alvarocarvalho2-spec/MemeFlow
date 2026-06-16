@@ -76,7 +76,6 @@ export function getEmbedUrl(url: string, autoplay = false) {
     const params = new URLSearchParams({ playsinline: '1', rel: '0', modestbranding: '1' });
     if (autoplay) {
       params.set('autoplay', '1');
-      params.set('mute', '1');
     }
     return `https://www.youtube.com/embed/${id}?${params.toString()}`;
   }
@@ -86,7 +85,6 @@ export function getEmbedUrl(url: string, autoplay = false) {
     const params = new URLSearchParams({ playsinline: '1', title: '0', byline: '0', portrait: '0' });
     if (autoplay) {
       params.set('autoplay', '1');
-      params.set('muted', '1');
     }
     return `https://player.vimeo.com/video/${id}?${params.toString()}`;
   }

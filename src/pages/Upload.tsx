@@ -271,7 +271,7 @@ export function Upload() {
               <div className="overflow-hidden rounded-[2rem] border bg-black">
                 <div className="aspect-[9/16]">
                   {videoPreview ? (
-                    <MediaPlayer src={videoPreview} poster={thumbPreview || undefined} controls muted active className="h-full w-full object-cover" />
+                    <MediaPlayer src={videoPreview} poster={thumbPreview || undefined} controls active className="h-full w-full object-cover" onToggleMuted={() => {}} />
                   ) : (
                     <div className="flex h-full items-center justify-center p-8 text-center text-white/70">Prévia do vídeo</div>
                   )}
